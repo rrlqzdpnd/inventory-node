@@ -1,9 +1,22 @@
 <md-toolbar color="primary">
-  <button *ngIf="__state.isLoggedIn" md-icon-button>
+  <button md-icon-button (click)="sidenav.toggle()">
     <md-icon>menu</md-icon>
   </button>
   <span>Inventory System</span>
 </md-toolbar>
-<div class="app-body">
-  <login *ngIf="!__state.isLoggedIn" (__state)=__state></login>
-</div>
+<md-sidenav-container fullscreen>
+  <md-sidenav #sidenav mode="side">
+    <a routerLink="/newType">
+      <button md-button class="sidebar-button">
+        <md-icon>add</md-icon>
+        Add New
+      </button>
+    </a>
+    <!-- <button md-button *ngFor="let x of __state.sidebar" class="sidebar-button">
+      {{ x }}
+    </button> -->
+  </md-sidenav>
+  <div class="app-content">
+    <router-outlet></router-outlet>
+  </div>
+</md-sidenav-container>

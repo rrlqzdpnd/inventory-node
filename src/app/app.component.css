@@ -1,0 +1,25 @@
+md-toolbar {
+  position: fixed;
+  width: 100%;
+}
+
+md-sidenav-container {
+  top: 64px !important;
+}
+
+md-sidenav {
+  width: 200px;
+}
+
+.sidebar-button {
+  width: 100%;
+  text-align: left;
+  padding: 8px 16px;
+  /*border-bottom: 1px solid #eeeeee;*/
+  color: #555555;
+}
+
+.app-content {
+  padding: 16px;
+  word-wrap: break-word !important;
+}

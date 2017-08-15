@@ -2,10 +2,9 @@ import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'login',
-  templateUrl: './login.html',
-  // styleUrls: ['./login.css']
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
-  title = "Errol Pineda"
   @Input() __state:Object;
 }
