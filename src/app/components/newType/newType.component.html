@@ -1,1 +1,11 @@
 <h2>New Item Type</h2>
+<md-list>
+  <md-list-item>
+    <md-input-container>
+      <input mdInput placeholder="Type name" (keyup)="onKey($event)">
+    </md-input-container>
+  </md-list-item>
+  <md-list-item>
+    <button md-raised-button (click)="submit()">Add Type</button>
+  </md-list-item>
+</md-list>

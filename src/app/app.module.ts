@@ -1,6 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule } from '@angular/core';
+import { HttpClientModule } from '@angular/common/http';
 import {
   MdButtonModule,
   MdGridListModule,
@@ -25,16 +26,17 @@ const routes: Routes = [
 @NgModule({
   declarations: [
     AppComponent,
-    NewTypeComponent
+    NewTypeComponent,
   ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
+    HttpClientModule,
     MdButtonModule,
     // MdGridListModule,
     MdIconModule,
-    // MdInputModule,
-    // MdListModule,
+    MdInputModule,
+    MdListModule,
     MdSidenavModule,
     MdToolbarModule,
     RouterModule.forRoot(routes)
