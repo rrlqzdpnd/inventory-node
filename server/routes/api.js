@@ -6,7 +6,12 @@ router.get('/', (req, res) => {
 })
 
 router.post('/newType', (req, res) => {
-  console.log(req)
+  console.log(req.body)
+  res.json({
+    status: 200,
+    message: "Entry added successfully",
+    body: { }
+  });
 })
 
 module.exports = router;

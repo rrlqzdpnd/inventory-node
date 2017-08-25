@@ -1,14 +1,18 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { CdkTableModule } from '@angular/cdk';
 import { NgModule } from '@angular/core';
 import { HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 import {
   MdButtonModule,
-  MdGridListModule,
+  MdCheckboxModule,
   MdIconModule,
   MdInputModule,
   MdListModule,
+  MdSelectModule,
   MdSidenavModule,
+  MdTableModule,
   MdToolbarModule
 } from '@angular/material';
 import { RouterModule, Routes } from '@angular/router';
@@ -31,13 +35,17 @@ const routes: Routes = [
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
+    CdkTableModule,
+    FormsModule,
     HttpClientModule,
     MdButtonModule,
-    // MdGridListModule,
+    MdCheckboxModule,
     MdIconModule,
     MdInputModule,
     MdListModule,
+    MdSelectModule,
     MdSidenavModule,
+    MdTableModule,
     MdToolbarModule,
     RouterModule.forRoot(routes)
   ],

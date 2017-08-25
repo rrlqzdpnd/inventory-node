@@ -9,18 +9,14 @@ export class NewTypeService {
 
   constructor(private http: HttpClient) { }
 
-  sendNewType(name) {
-    var params = {
-      'name': name
-    }
-
-    this.http.post(
+  sendNewType(data) {
+    return this.http.post(
       '/api/newType',
-      JSON.stringify(params),
-      // {
-      //   headers: this.headers
-      // }
-    )
-    .subscribe()
+      JSON.stringify(data),
+      {
+        headers: this.headers
+      }
+    );
   }
+  
 }

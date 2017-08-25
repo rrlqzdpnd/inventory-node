@@ -1,11 +1,66 @@
+<pre>{{ properties.data | json }}</pre>
+<pre>{{ response | json }}</pre>
 <h2>New Item Type</h2>
-<md-list>
-  <md-list-item>
-    <md-input-container>
-      <input mdInput placeholder="Type name" (keyup)="onKey($event)">
-    </md-input-container>
-  </md-list-item>
-  <md-list-item>
-    <button md-raised-button (click)="submit()">Add Type</button>
-  </md-list-item>
-</md-list>
+<form #newTypeForm="ngForm" (ngSubmit)="submit()" id="newTypeForm">
+  <md-input-container>
+    <input mdInput [(ngModel)]="name" name="name" placeholder="Type name">
+  </md-input-container>
+
+  <md-table #table [dataSource]="propertyList">
+
+    <!-- Property Name -->
+    <ng-container cdkColumnDef="name">
+      <md-header-cell *cdkHeaderCellDef>Property Name</md-header-cell>
+      <md-cell *cdkCellDef="let row">
+        <md-input-container floatPlaceholder="never">
+          <input mdInput placeholder="Name" [(ngModel)]="row.name" [ngModelOptions]="{ standalone: true }">
+        </md-input-container>
+      </md-cell>
+    </ng-container>
+
+    <!-- Data Type -->
+    <ng-container cdkColumnDef="type">
+      <md-header-cell *cdkHeaderCellDef>Data Type</md-header-cell>
+      <md-cell *cdkCellDef="let row">
+        <md-select placeholder="Type" floatPlaceholder="never" [(ngModel)]="row.type" [ngModelOptions]="{ standalone: true }">
+          <md-option *ngFor="let type of dataTypes" [value]="type.id">{{ type.name }}</md-option>
+        </md-select>
+      </md-cell>
+    </ng-container>
+
+    <!-- Length -->
+    <ng-container cdkColumnDef="length">
+      <md-header-cell *cdkHeaderCellDef>Length</md-header-cell>
+      <md-cell *cdkCellDef="let row">
+        <md-input-container floatPlaceholder="never">
+          <input mdInput class="hfill" type="number" placeholder="Length" [(ngModel)]="row.length" [ngModelOptions]="{ standalone: true }">
+        </md-input-container>
+      </md-cell>
+    </ng-container>
+
+    <!-- Is Required -->
+    <ng-container cdkColumnDef="isRequired">
+      <md-header-cell *cdkHeaderCellDef>Required?</md-header-cell>
+      <md-cell *cdkCellDef="let row">
+        <md-checkbox [(ngModel)]="row.isRequired" [ngModelOptions]="{ standalone: true }"></md-checkbox>
+      </md-cell>
+    </ng-container>
+
+    <!-- Actions -->
+    <ng-container cdkColumnDef="actions">
+      <md-header-cell *cdkHeaderCellDef>Actions</md-header-cell>
+      <md-cell *cdkCellDef="let row, $index">
+        <button md-button (click)="properties.removeProperty(row.id)" type="button">
+          <md-icon>clear</md-icon>
+          {{ $index }}
+        </button>
+      </md-cell>
+    </ng-container>
+
+    <md-header-row *cdkHeaderRowDef="displayedColumns"></md-header-row>
+    <md-row *cdkRowDef="let row; columns: displayedColumns"></md-row>
+  </md-table>
+  <button md-raised-button class="full-width" (click)="properties.addProperty()" type="button">Add Property</button>
+  &nbsp;
+  <button md-raised-button class="full-width" type="submit">Add Type</button>
+</form>

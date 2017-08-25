@@ -7,7 +7,7 @@
 <md-sidenav-container fullscreen>
   <md-sidenav #sidenav mode="side">
     <a routerLink="/newType">
-      <button md-button class="sidebar-button">
+      <button md-button class="sidebar-button" (click)="sidenav.close()">
         <md-icon>add</md-icon>
         Add New
       </button>
