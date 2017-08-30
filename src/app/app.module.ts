@@ -19,6 +19,7 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { AppComponent } from './app.component';
 import { NewTypeComponent } from './components/newType/newType.component';
+import { SharedService } from './parentchild.service';
 
 const routes: Routes = [
   {
@@ -49,7 +50,7 @@ const routes: Routes = [
     MdToolbarModule,
     RouterModule.forRoot(routes)
   ],
-  providers: [],
-  bootstrap: [AppComponent]
+  providers: [ SharedService ],
+  bootstrap: [ AppComponent ]
 })
 export class AppModule { }

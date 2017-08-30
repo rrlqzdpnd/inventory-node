@@ -1,9 +1,19 @@
 import { DataSource } from '@angular/cdk';
-import { Component, Input } from '@angular/core';
+import {
+  Component,
+  Injectable,
+  Input
+} from '@angular/core';
 import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 
+import { SharedService } from '../../parentchild.service';
 import { NewTypeService } from './newType.service';
+
+export interface ProductType {
+  id: number;
+  name: string;
+}
 
 @Component({
   selector: 'newType',
@@ -13,9 +23,11 @@ import { NewTypeService } from './newType.service';
     NewTypeService
   ]
 })
+@Injectable()
 export class NewTypeComponent {
 
-  dataTypes: Array<any> = [];
+  dataTypeEnum = DataType;
+  dataTypeInput: Array<any> = [];
   propertyList: PropertyDataSource | null;
   displayedColumns: Array<string> = [ 'name', 'type', 'length', 'isRequired', 'actions' ];
 
@@ -23,10 +35,10 @@ export class NewTypeComponent {
   properties: PropertyList =  new PropertyList();
   response: any;
 
-  constructor(private service: NewTypeService) {
+  constructor(private _service: NewTypeService, private _sharedService: SharedService) {
     var dataTypeKeys = Object.keys(DataType);
     dataTypeKeys.slice(dataTypeKeys.length / 2).forEach((val, key) => {
-      this.dataTypes.push({
+      this.dataTypeInput.push({
         id: key,
         name: val
       });
@@ -43,8 +55,9 @@ export class NewTypeComponent {
       properties: this.properties.data
     }
 
-    this.service.sendNewType(params).subscribe((data) => {
+    this._service.sendNewType(params).subscribe((data: any) => {
       this.response = data;
+      this._sharedService.emit<ProductType>("newType", data.body.newType);
     })
   }
 

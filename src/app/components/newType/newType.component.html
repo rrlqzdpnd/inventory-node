@@ -1,4 +1,4 @@
-<pre>{{ properties.data | json }}</pre>
+<!-- <pre>{{ properties.data | json }}</pre> -->
 <pre>{{ response | json }}</pre>
 <h2>New Item Type</h2>
 <form #newTypeForm="ngForm" (ngSubmit)="submit()" id="newTypeForm">
@@ -23,7 +23,7 @@
       <md-header-cell *cdkHeaderCellDef>Data Type</md-header-cell>
       <md-cell *cdkCellDef="let row">
         <md-select placeholder="Type" floatPlaceholder="never" [(ngModel)]="row.type" [ngModelOptions]="{ standalone: true }">
-          <md-option *ngFor="let type of dataTypes" [value]="type.id">{{ type.name }}</md-option>
+          <md-option *ngFor="let type of dataTypeInput" [value]="type.id">{{ type.name }}</md-option>
         </md-select>
       </md-cell>
     </ng-container>
@@ -33,7 +33,7 @@
       <md-header-cell *cdkHeaderCellDef>Length</md-header-cell>
       <md-cell *cdkCellDef="let row">
         <md-input-container floatPlaceholder="never">
-          <input mdInput class="hfill" type="number" placeholder="Length" [(ngModel)]="row.length" [ngModelOptions]="{ standalone: true }">
+          <input mdInput class="hfill" type="number" placeholder="Length" [disabled]="row.type != dataTypeEnum.String" [(ngModel)]="row.length" [ngModelOptions]="{ standalone: true }">
         </md-input-container>
       </md-cell>
     </ng-container>

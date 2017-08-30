@@ -1,14 +1,18 @@
-const express = require('express')
-const { Pool } = require('pg')
-const router = express.Router()
+const express = require('express');
+const { Pool } = require('pg');
 
 const pool = new Pool({
   user: 'postgres',
   host: 'localhost',
   database: 'inventory_errol'
 })
+const DataType = {
+  String: 0,
+  Integer: 1,
+  Boolean: 2
+}
 
-var returnMessage = function(resObj, isSuccess, body = {}) {
+const returnMessage = function(resObj, isSuccess, body = {}) {
   const reply = {
     success: true
   };
@@ -19,48 +23,100 @@ var returnMessage = function(resObj, isSuccess, body = {}) {
   resObj.json(reply);
 }
 
-router.get('/', (req, res) => {
-  res.send('API works!')
-})
+const router = express.Router();
+
+router.get('/products', (req, res) => {
+
+});
 
 router.post('/newType', (req, res) => {
-  var checkTableName = (body, callback, count = 1) => {
-    let transform = body.name.trim().toLowerCase();
-    transform = transform.replace(/\s+/g, '_');
-    transform += (count == 1) ? '' : ('_' + count);
+  let checkTableName = (body, callback, count = 1) => {
+    let tblName = body.name.trim().toLowerCase();
+    tblName = tblName.replace(/\s+/g, '_');
+    tblName += (count == 1) ? '' : ('_' + count);
+    tblName = "inv_" + tblName;
 
-    let s = "SELECT 1 " +
-    "FROM information_schema.tables " +
-    "WHERE table_name = \'" + transform + "\'"
-    console.log("Checking name:", transform);
+    let s = "SELECT 1 \
+    FROM information_schema.tables \
+    WHERE table_name = \'" + tblName + "\'";
 
     let query = pool.query(s);
-    query.then((res) => {
-      if(res.rows.length == 0) {
-
-        let isValid = validateProperties(body.properties);
-        if(isValid)
-          callback(transform, body.properties);
-        else
-          returnMessage(res, false);
-      }
+    query.then((result) => {
+      if(result.rows.length == 0)
+        callback(tblName, body.properties);
       else
-        checkTableName(body, callback, count+1);
+        checkTableName(body, callback, count + 1);
     }).catch((err) => {
-      returnMessage(res, false);
+      returnMessage(res, false, { message: "Database error. Please try again" });
     })
   };
 
-  var validateProperties = (props) => {
-    return true;
+  let validateProps = (body, callback) => {
+    let isValid = true;
+
+    if(!body.name)
+      isValid = false;
+
+    body.properties.forEach((prop) => {
+      if(!prop.name)
+        isValid = false;
+    })
+
+    if(isValid)
+      checkTableName(body, callback);
+    else
+      returnMessage(res, false, { message: "Input is not valid" });
   };
 
-  checkTableName(req.body, (name, props) => {
-    // console.log(name, props);
-    console.log("Using name:", name);
+  let createTable = (name, props) => {
+    let s = "CREATE TABLE " + name + "("
+    props.forEach((prop) => {
+      let colName = prop.name.toLowerCase();
+      colName = colName.replace(/\s+/g, '_');
+      colName += "_" + prop.id;
 
-    returnMessage(res, true);
-  });
+      s += colName;
+      switch(prop.type) {
+        case DataType.String:
+          s += " varchar(" + prop.length + ")";
+          break;
+        case DataType.Integer:
+          s += " integer";
+          break;
+        case DataType.Boolean:
+          s += " boolean";
+          break;
+        default:
+          returnMessage(res, false, { message: "Unknown data type" });
+          break;
+      }
+      if(prop.isRequired)
+        s += " not null";
+
+      s += ",";
+    });
+    s = s.replace(/,$/, '') + ')';
+
+    let query = pool.query(s);
+    query.then((result) => {
+      let s = "INSERT INTO meta_product_types(name, slug) VALUES ($1, $2) RETURNING id";
+      let query2 = pool.query(s, [req.body.name, name]);
+      query2.then((result) => {
+        let newType = {
+          id: result.rows[0].id,
+          name: req.body.name
+        };
+        returnMessage(res, true, { newType: newType });
+      }).catch((err) => {
+        returnMessage(res, false, { message: "Error creating new product in database" })
+      });
+    })
+    .catch((err) => {
+      returnMessage(res, false, { message: "Error creating table" });
+    });
+  }
+
+  validateProps(req.body, createTable);
 })
 
 module.exports = router;
