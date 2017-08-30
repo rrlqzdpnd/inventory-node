@@ -25,8 +25,33 @@ const returnMessage = function(resObj, isSuccess, body = {}) {
 
 const router = express.Router();
 
-router.get('/products', (req, res) => {
+router.get('/products/:query?', (req, res) => {
+  pool.connect()
+  .then((client) => {
+    let paramQuery = req.params.query;
 
+    let s = "SELECT id, name FROM meta_product_types";
+    let query;
+    if(!paramQuery)
+      query = client.query(s);
+    else {
+      s += " WHERE name ILIKE $1";
+      query = client.query(s, [ '%' + paramQuery + '%' ]);
+    }
+
+    query.then((result) => {
+      returnMessage(res, true, { products: result.rows });
+      client.release();
+    })
+    .catch((err) => {
+      returnMessage(res, false, { messsage: "Error fetching data from database" });
+      client.release();
+    })
+  })
+  .catch((err) => {
+    returnMessage(res, false, { message: "Error connecting to database" });
+    client.release();
+  })
 });
 
 router.post('/newType', (req, res) => {

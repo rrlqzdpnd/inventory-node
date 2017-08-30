@@ -19,10 +19,13 @@ export class AppComponent implements OnDestroy {
 
   constructor(private _service: AppService, private _sharedService: SharedService) {
     this._newTypeListener = _sharedService.listen<ProductType>("newType", (data) => {
-      console.log(data);
-      this._service.getSidebar().subscribe((data) => {
-        console.log(data);
-      });
+      this.sidebar.push(data);
+    });
+  }
+
+  ngOnInit() {
+    this._service.getSidebar().subscribe((data: any) => {
+      this.sidebar = data.body.products;
     });
   }
 
