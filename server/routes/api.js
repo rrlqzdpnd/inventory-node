@@ -35,8 +35,8 @@ router.get('/products/:query?', (req, res) => {
     if(!paramQuery)
       query = client.query(s);
     else {
-      s += " WHERE name ILIKE $1";
-      query = client.query(s, [ '%' + paramQuery + '%' ]);
+      s += " WHERE name ILIKE '%'||$1||'%'";
+      query = client.query(s, [ paramQuery ]);
     }
 
     query.then((result) => {
@@ -55,93 +55,107 @@ router.get('/products/:query?', (req, res) => {
 });
 
 router.post('/newType', (req, res) => {
-  let checkTableName = (body, callback, count = 1) => {
-    let tblName = body.name.trim().toLowerCase();
-    tblName = tblName.replace(/\s+/g, '_');
-    tblName += (count == 1) ? '' : ('_' + count);
-    tblName = "inv_" + tblName;
+  pool.connect()
+  .then((client)=> {
+    let checkTableName = (body, callback, count = 1) => {
+      let tblName = body.name.trim().toLowerCase();
+      tblName = tblName.replace(/\s+/g, '_');
+      tblName += (count == 1) ? '' : ('_' + count);
+      tblName = "inv_" + tblName;
 
-    let s = "SELECT 1 \
-    FROM information_schema.tables \
-    WHERE table_name = \'" + tblName + "\'";
+      let s = "SELECT 1 \
+      FROM information_schema.tables \
+      WHERE table_name = \'" + tblName + "\'";
 
-    let query = pool.query(s);
-    query.then((result) => {
-      if(result.rows.length == 0)
-        callback(tblName, body.properties);
-      else
-        checkTableName(body, callback, count + 1);
-    }).catch((err) => {
-      returnMessage(res, false, { message: "Database error. Please try again" });
-    })
-  };
+      client.query(s)
+      .then((result) => {
+        if(result.rows.length == 0)
+          callback(tblName, body.properties);
+        else
+          checkTableName(body, callback, count + 1);
+      })
+      .catch((err) => {
+        returnMessage(res, false, { message: "Database error. Please try again" });
+        client.release();
+      })
+    };
 
-  let validateProps = (body, callback) => {
-    let isValid = true;
+    let validateProps = (body, callback) => {
+      let isValid = true;
 
-    if(!body.name)
-      isValid = false;
-
-    body.properties.forEach((prop) => {
-      if(!prop.name)
+      if(!body.name)
         isValid = false;
-    })
 
-    if(isValid)
-      checkTableName(body, callback);
-    else
-      returnMessage(res, false, { message: "Input is not valid" });
-  };
+      body.properties.forEach((prop) => {
+        if(!prop.name)
+          isValid = false;
+      })
 
-  let createTable = (name, props) => {
-    let s = "CREATE TABLE " + name + "("
-    props.forEach((prop) => {
-      let colName = prop.name.toLowerCase();
-      colName = colName.replace(/\s+/g, '_');
-      colName += "_" + prop.id;
-
-      s += colName;
-      switch(prop.type) {
-        case DataType.String:
-          s += " varchar(" + prop.length + ")";
-          break;
-        case DataType.Integer:
-          s += " integer";
-          break;
-        case DataType.Boolean:
-          s += " boolean";
-          break;
-        default:
-          returnMessage(res, false, { message: "Unknown data type" });
-          break;
+      if(isValid)
+        checkTableName(body, callback);
+      else {
+        returnMessage(res, false, { message: "Input is not valid" });
+        client.release();
       }
-      if(prop.isRequired)
-        s += " not null";
+    };
 
-      s += ",";
-    });
-    s = s.replace(/,$/, '') + ')';
+    let createTable = (name, props) => {
+      let s = "CREATE TABLE " + name + "("
+      props.forEach((prop) => {
+        let colName = prop.name.toLowerCase();
+        colName = colName.replace(/\s+/g, '_');
+        colName += "_" + prop.id;
 
-    let query = pool.query(s);
-    query.then((result) => {
-      let s = "INSERT INTO meta_product_types(name, slug) VALUES ($1, $2) RETURNING id";
-      let query2 = pool.query(s, [req.body.name, name]);
-      query2.then((result) => {
-        let newType = {
-          id: result.rows[0].id,
-          name: req.body.name
-        };
-        returnMessage(res, true, { newType: newType });
-      }).catch((err) => {
-        returnMessage(res, false, { message: "Error creating new product in database" })
+        s += colName;
+        switch(prop.type) {
+          case DataType.String:
+            s += " varchar(" + prop.length + ")";
+            break;
+          case DataType.Integer:
+            s += " integer";
+            break;
+          case DataType.Boolean:
+            s += " boolean";
+            break;
+          default:
+            returnMessage(res, false, { message: "Unknown data type" });
+            break;
+        }
+        if(prop.isRequired)
+          s += " not null";
+
+        s += ",";
       });
-    })
-    .catch((err) => {
-      returnMessage(res, false, { message: "Error creating table" });
-    });
-  }
+      s = s.replace(/,$/, '') + ')';
 
-  validateProps(req.body, createTable);
+      let query = client.query(s);
+      query.then((result) => {
+        let s = "INSERT INTO meta_product_types(name, slug) VALUES ($1, $2) RETURNING id";
+        let query2 = client.query(s, [req.body.name, name]);
+        query2.then((result) => {
+          let newType = {
+            id: result.rows[0].id,
+            name: req.body.name
+          };
+          returnMessage(res, true, { newType: newType });
+          client.release();
+        }).catch((err) => {
+          returnMessage(res, false, { message: "Error creating new product in database" })
+          client.release();
+        });
+      })
+      .catch((err) => {
+        returnMessage(res, false, { message: "Error creating table" });
+        client.release();
+      });
+    }
+
+    validateProps(req.body, createTable);
+  })
+  .catch((err) => {
+    returnMessage(res, false, { message: "Error connecting to database" });
+    client.release();
+  });
 })
 
 module.exports = router;
