@@ -4,16 +4,15 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 const HEADERS = new HttpHeaders().set('Content-Type', 'application/json');
 
 @Injectable()
-export class NewTypeService {
+export class ProductService {
 
   headers = HEADERS
 
-  constructor(private _http: HttpClient) { }
+  constructor(private _http: HttpClient) {}
 
-  sendNewType(data) {
-    return this._http.post(
-      '/api/newType',
-      JSON.stringify(data),
+  getProduct(id: number) {
+    return this._http.get(
+      `/api/product/${id}`,
       {
         headers: this.headers
       }

@@ -28,16 +28,6 @@
       </md-cell>
     </ng-container>
 
-    <!-- Length -->
-    <ng-container cdkColumnDef="length">
-      <md-header-cell *cdkHeaderCellDef>Length</md-header-cell>
-      <md-cell *cdkCellDef="let row">
-        <md-input-container floatPlaceholder="never">
-          <input mdInput class="hfill" type="number" placeholder="Length" [disabled]="row.type != dataTypeEnum.String" [(ngModel)]="row.length" [ngModelOptions]="{ standalone: true }">
-        </md-input-container>
-      </md-cell>
-    </ng-container>
-
     <!-- Is Required -->
     <ng-container cdkColumnDef="isRequired">
       <md-header-cell *cdkHeaderCellDef>Required?</md-header-cell>

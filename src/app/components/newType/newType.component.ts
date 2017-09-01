@@ -29,7 +29,7 @@ export class NewTypeComponent {
   dataTypeEnum = DataType;
   dataTypeInput: Array<any> = [];
   propertyList: PropertyDataSource | null;
-  displayedColumns: Array<string> = [ 'name', 'type', 'length', 'isRequired', 'actions' ];
+  displayedColumns: Array<string> = [ 'name', 'type', 'isRequired', 'actions' ];
 
   name: string = "";
   properties: PropertyList =  new PropertyList();
@@ -72,7 +72,6 @@ interface Property {
   id: number;
   name: string;
   type: DataType;
-  length: number;
   isRequired: boolean;
 }
 
@@ -86,7 +85,12 @@ class PropertyList {
 
   addProperty(): void {
     let clone = this.data.slice();
-    clone.push(this._randomize());
+    clone.push({
+      id: this._getLastId() + 1,
+      name: '',
+      type: DataType.String,
+      isRequired: false
+    });
     this.dataList.next(clone);
   }
 
@@ -101,16 +105,6 @@ class PropertyList {
     if(last)
       return last.id;
     return 0;
-  }
-
-  private _randomize() {
-    return {
-      id: this._getLastId() + 1,
-      name: '',
-      type: DataType.String,
-      length: 48,
-      isRequired: false
-    }
   }
 
 }
