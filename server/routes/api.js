@@ -9,7 +9,10 @@ const pool = new Pool({
 const DataType = {
   String: 0,
   Integer: 1,
-  Boolean: 2
+  Boolean: 2,
+  0: "String",
+  1: "Integer",
+  2: "Boolean",
 }
 
 const returnMessage = function(resObj, isSuccess, body = {}) {
@@ -65,6 +68,7 @@ router.get('/products/:query?', (req, res) => {
 });
 
 router.post('/newType', (req, res) => {
+  // start of validation
   let validateProps = (body) => {
     let isValid = true;
 
@@ -84,6 +88,7 @@ router.post('/newType', (req, res) => {
     return;
   }
 
+  // end of validation; will not go here if input is invalid
   let checkProduct = (client, body, count = 1) => {
     let productName = body.name.trim().toLowerCase();
     productName = productName.replace(/\s+/g, '_');
@@ -94,7 +99,7 @@ router.post('/newType', (req, res) => {
     return client.query(s, [ productName ])
     .then((result) => {
       if(result.rows.length == 0)
-        return Promise.resolve(productName);//createProduct(client, productName, body);
+        return Promise.resolve(productName);
       else
         return checkProduct(client, body, count + 1);
     })
@@ -104,107 +109,80 @@ router.post('/newType', (req, res) => {
     });
   };
 
-  let createProduct = (client, productName, body) => {
-    return client.query("BEGIN");
-  }
-
   let clientProm = pool.connect();
-  clientProm.catch((err) => {
-    returnMessage(res, false, { message: err });
-  });
 
   let nameProm = clientProm.then((client) => {
     return checkProduct(client, req.body);
+  });
+
+  let transProm = clientProm.then((client) => {
+    return client.query("BEGIN")
+  });
+
+  let allProm = Promise.all([clientProm, nameProm, transProm]);
+  allProm.then(([client, name, trans]) => {
+    var productId = 0;
+
+    return client.query("INSERT INTO inv_products(name, slug) VALUES ($1, $2) RETURNING id", [req.body.name, name])
+    .then((result) => {
+      productId = result.rows[0].id;
+
+      let chunks = [], values = [];
+      req.body.properties.forEach((prop) => {
+        let row = [];
+
+        // product_id
+        values.push(productId);
+        row.push('$' + values.length);
+
+        // name
+        values.push(`${prop.name}`);
+        row.push('$' + values.length);
+
+        // slug
+        let propSlug = prop.name.trim().toLowerCase();
+        propSlug = propSlug.replace(/\s+/g, '_');
+        values.push(`${propSlug}`);
+        row.push('$' + values.length);
+
+        // type
+        values.push(DataType[prop.type]);
+        row.push('$' + values.length);
+
+        // is_required
+        values.push(prop.isRequired);
+        row.push('$' + values.length);
+
+        chunks.push("(" + row.join(',') + ")");
+      });
+
+      return client.query({
+        text: "INSERT INTO inv_product_columns(product_id, name, slug, type, is_required) VALUES " + chunks.join(','),
+        values: values
+      });
+    })
+    .then((result) => {
+      return client.query("COMMIT")
+    })
+    .then((result) => {
+      client.release();
+      return Promise.resolve({
+        id: productId,
+        name: name
+      })
+    })
+    .catch((err) => {
+      client.query('ROLLBACK');
+      client.release();
+      throw "Error creating new product";
+    })
   })
-
-  nameProm.then((result) => {
-    console.log(result);
-  })
-
-
-  //
-  //   let createProduct = (name, body) => {
-  //     client.query("BEGIN")
-  //     .catch((err) => {
-  //       client.query("ROLLBACK");
-  //       client.release();
-  //       throw "Error with transaction";
-  //     })
-  //     // let s = "CREATE TABLE " + name + "("
-  //     // props.forEach((prop) => {
-  //     //   let colName = prop.name.toLowerCase();
-  //     //   colName = colName.replace(/\s+/g, '_');
-  //     //   colName += "_" + prop.id;
-  //     //
-  //     //   s += colName;
-  //     //   switch(prop.type) {
-  //     //     case DataType.String:
-  //     //       s += " varchar(" + prop.length + ")";
-  //     //       break;
-  //     //     case DataType.Integer:
-  //     //       s += " integer";
-  //     //       break;
-  //     //     case DataType.Boolean:
-  //     //       s += " boolean";
-  //     //       break;
-  //     //     default:
-  //     //       returnMessage(res, false, { message: "Unknown data type" });
-  //     //       break;
-  //     //   }
-  //     //   if(prop.isRequired)
-  //     //     s += " not null";
-  //     //
-  //     //   s += ",";
-  //     // });
-  //     // s = s.replace(/,$/, '') + ')';
-  //     //
-  //     // let query = client.query(s);
-  //     // query.then((result) => {
-  //     //   let s = "INSERT INTO meta_product_types(name, slug) VALUES ($1, $2) RETURNING id";
-  //     //   let query2 = client.query(s, [req.body.name, name]);
-  //     //   query2.then((result) => {
-  //     //     let newType = {
-  //     //       id: result.rows[0].id,
-  //     //       name: req.body.name
-  //     //     };
-  //     //     returnMessage(res, true, { newType: newType });
-  //     //     client.release();
-  //     //   }).catch((err) => {
-  //     //     returnMessage(res, false, { message: "Error creating new product in database" })
-  //     //     client.release();
-  //     //   });
-  //     // })
-  //     // .catch((err) => {
-  //     //   returnMessage(res, false, { message: "Error creating table" });
-  //     //   client.release();
-  //     // });
-  //   }
-  //
-  //   let checkProduct = (body, count = 1) => {
-  //     let productName = body.name.trim().toLowerCase();
-  //     productName = productName.replace(/\s+/g, '_');
-  //     productName += (count == 1) ? '' : ('_' + count);
-  //
-  //     let s = "SELECT 1 FROM inv_products WHERE slug = $1";
-  //
-  //     return client.query(s, [ productName ])
-  //     .then((result) => {
-  //       if(result.rows.length == 0)
-  //         return createProduct(productName, body);
-  //       else
-  //         return checkProduct(body, count + 1);
-  //     })
-  //     .catch((err) => {
-  //       client.release();
-  //       throw "Database error. Please try again";
-  //     });
-  //   };
-  //
-  //   return checkProduct(req.body);
-  // })
-  // .then((client) => {
-  //   console.log('Beginning transaction')
-  // })
+  .then((result) => {
+    returnMessage(res, true, { newType: result });
+  }).
+  .catch((err) => {
+    returnMessage(res, false, { message: err });
+  });
 })
 
 module.exports = router;

@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS inv_product_columns(
   product_id int references inv_products(id) not null,
   name varchar(256) not null,
   slug varchar(256) not null,
-  type int not null
+  type varchar(24) not null,
+  is_required boolean default false
 );
 
 CREATE TABLE IF NOT EXISTS inv_product_items();
