@@ -5,7 +5,6 @@ import { AppService } from './app.service';
 import { ProductType } from './components/newType/newType.component';
 import { IEventListener } from './parentchild.service';
 
-
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -14,19 +13,19 @@ import { IEventListener } from './parentchild.service';
 })
 export class AppComponent implements OnDestroy {
 
-  sidebar: ProductType[] = [];
   private _newTypeListener: IEventListener;
+  sidebar: Array<ProductType> = [];
 
   constructor(private _service: AppService, private _sharedService: SharedService) {
-    this._newTypeListener = _sharedService.listen<ProductType>("newType", (data) => {
+    this._newTypeListener = this._sharedService.listen<ProductType>("newType", (data) => {
       this.sidebar.push(data);
     });
   }
 
   ngOnInit() {
-    this._service.getSidebar().subscribe((data: any) => {
-      this.sidebar = data.body.products;
-    });
+    // this._service.getSidebar().subscribe((data: any) => {
+    //   this.sidebar = data.body.products;
+    // });
   }
 
   ngOnDestroy() {

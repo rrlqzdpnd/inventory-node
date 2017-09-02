@@ -168,7 +168,7 @@ router.post('/newType', (req, res) => {
       client.release();
       return Promise.resolve({
         id: productId,
-        name: name
+        name: req.body.name
       })
     })
     .catch((err) => {
@@ -179,7 +179,7 @@ router.post('/newType', (req, res) => {
   })
   .then((result) => {
     returnMessage(res, true, { newType: result });
-  }).
+  })
   .catch((err) => {
     returnMessage(res, false, { message: err });
   });
