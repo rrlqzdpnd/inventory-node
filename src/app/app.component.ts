@@ -23,9 +23,9 @@ export class AppComponent implements OnDestroy {
   }
 
   ngOnInit() {
-    // this._service.getSidebar().subscribe((data: any) => {
-    //   this.sidebar = data.body.products;
-    // });
+    this._service.getSidebar().subscribe((data: any) => {
+      this.sidebar = data.body.products;
+    });
   }
 
   ngOnDestroy() {

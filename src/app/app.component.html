@@ -6,20 +6,17 @@
 </md-toolbar>
 <md-sidenav-container fullscreen>
   <md-sidenav #sidenav mode="side">
-    <ng-container *ngFor="let type of sidebar">
+    <a *ngFor="let type of sidebar" routerLink='/product/{{type.id}}'>
       <button md-button class="sidebar-button" (click)="sidenav.close()">
         {{ type.name }}
       </button>
-    </ng-container>
+    </a>
     <a routerLink="/newType">
       <button md-button class="sidebar-button" (click)="sidenav.close()">
         <md-icon>add</md-icon>
         Add New
       </button>
     </a>
-    <!-- <button md-button *ngFor="let x of __state.sidebar" class="sidebar-button">
-      {{ x }}
-    </button> -->
   </md-sidenav>
   <div class="app-content">
     <router-outlet></router-outlet>

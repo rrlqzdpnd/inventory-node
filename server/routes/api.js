@@ -39,11 +39,11 @@ router.get('/product/:id', (req, res) => {
 });
 
 router.get('/products/:query?', (req, res) => {
-  pool.connect()
-  .then((client) => {
+  let clientProm = pool.connect();
+  clientProm.then((client) => {
     let paramQuery = req.params.query;
 
-    let s = "SELECT id, name FROM meta_product_types";
+    let s = "SELECT id, name FROM inv_products";
     let query;
     if(!paramQuery)
       query = client.query(s);
@@ -52,18 +52,18 @@ router.get('/products/:query?', (req, res) => {
       query = client.query(s, [ paramQuery ]);
     }
 
-    query.then((result) => {
+    return query
+    .then((result) => {
       returnMessage(res, true, { products: result.rows });
       client.release();
     })
     .catch((err) => {
-      returnMessage(res, false, { messsage: "Error fetching data from database" });
       client.release();
+      throw "Error fetching data from database";
     })
   })
   .catch((err) => {
-    returnMessage(res, false, { message: "Error connecting to database" });
-    client.release();
+    returnMessage(res, false, { message: err });
   })
 });
 
