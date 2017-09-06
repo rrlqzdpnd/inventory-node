@@ -17,6 +17,7 @@ import { ProductService } from './product.service';
 @Component({
   selector: 'product',
   templateUrl: './product.component.html',
+  styleUrls: ['./product.component.css'],
   providers: [ ProductService ]
 })
 export class ProductComponent {

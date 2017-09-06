@@ -1,0 +1,17 @@
+#title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#title > h2 {
+  display: inline-block;
+}
+
+#title > button.mat-raised-button {
+  margin-left: auto;
+}
+
+#body > .mat-spinner {
+  margin: auto;
+}
