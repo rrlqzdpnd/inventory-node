@@ -1,1 +1,17 @@
-Whaddup
+<!-- <pre>{{ product | json }}</pre>
+<pre>{{ isDataReady | json }}</pre> -->
+<h2>{{ product?.name }}</h2>
+<md-spinner *ngIf="!isDataReady"></md-spinner>
+<md-table #table [dataSource]="itemList" *ngIf="isDataReady">
+  <ng-container *ngFor="let column of product?.columns">
+    <ng-container cdkColumnDef="{{ column.slug }}">
+      <md-header-cell *cdkHeaderCellDef>{{ column.name }}</md-header-cell>
+      <md-cell *cdkCellDef="let row">
+        {{ row }}
+      </md-cell>
+    </ng-container>
+  </ng-container>
+
+  <md-header-row *cdkHeaderRowDef="productColumns"></md-header-row>
+  <md-row *cdkRowDef="let row; columns: productColumns"></md-row>
+</md-table>

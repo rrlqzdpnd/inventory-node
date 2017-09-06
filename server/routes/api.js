@@ -31,7 +31,48 @@ const router = express.Router();
 router.get('/product/:id', (req, res) => {
   pool.connect()
   .then((client) => {
+    let productId = parseInt(req.params.id);
+    var product = {
+      id: productId
+    };
 
+    client.query("SELECT name, slug FROM inv_products WHERE id = $1 AND is_active = TRUE", [ productId ])
+    .then((result) => {
+      if(!result.rows) {
+        client.release();
+        throw "Product not found.";
+      }
+
+      product.name = result.rows[0].name;
+      product.slug = result.rows[0].slug;
+
+      return client.query("SELECT id, name, slug, type, is_required FROM inv_product_columns WHERE product_id = $1", [ productId ]);
+    })
+    .then((result) => {
+      let columns = [];
+      let column
+      result.rows.forEach((row) => {
+        columns.push({
+          id: row.id,
+          name: row.name,
+          slug: row.slug,
+          type: row.type,
+          is_required: row.is_required
+        });
+      });
+      product.columns = columns;
+
+      product.items = [];
+
+      client.release();
+      returnMessage(res, true, { product: product });
+    })
+    // .then((result) => {
+    // })
+    .catch((err) => {
+      client.release();
+      throw "Error fetching product";
+    });
   })
   .catch((err) => {
     returnMessage(res, false, { message: "Error connecting to database" });

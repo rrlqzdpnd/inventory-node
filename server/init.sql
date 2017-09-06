@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS inv_products(
   id serial primary key,
   name varchar(256) not null,
   slug varchar(256) not null,
-  isactive boolean default true,
+  is_active boolean default true,
   description text
 );
 
