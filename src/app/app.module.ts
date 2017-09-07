@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
 import {
   MdButtonModule,
   MdCheckboxModule,
+  MdDialogModule,
   MdIconModule,
   MdInputModule,
   MdListModule,
@@ -23,6 +24,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { AppComponent } from './app.component';
 import { NewTypeComponent } from './components/newType/newType.component';
 import { ProductComponent } from './components/product/product.component';
+import { ProductDialogComponent } from './components/product/dialog/dialog.component';
 import { SharedService } from './parentchild.service';
 
 const routes: Routes = [
@@ -35,7 +37,8 @@ const routes: Routes = [
   declarations: [
     AppComponent,
     NewTypeComponent,
-    ProductComponent
+    ProductComponent,
+    ProductDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -45,6 +48,7 @@ const routes: Routes = [
     HttpClientModule,
     MdButtonModule,
     MdCheckboxModule,
+    MdDialogModule,
     MdIconModule,
     MdInputModule,
     MdListModule,
@@ -56,6 +60,11 @@ const routes: Routes = [
     RouterModule.forRoot(routes)
   ],
   providers: [ SharedService ],
-  bootstrap: [ AppComponent ]
+  entryComponents: [
+    ProductDialogComponent,
+  ],
+  bootstrap: [
+    AppComponent,
+  ]
 })
 export class AppModule { }

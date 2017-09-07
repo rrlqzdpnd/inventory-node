@@ -2,7 +2,7 @@
 <pre>{{ isDataReady | json }}</pre> -->
 <div id="title">
   <h2>{{ product?.name }}</h2>
-  <button md-raised-button>Add new Item</button>
+  <button md-raised-button (click)="openDialog()">Add new Item</button>
 </div>
 <div id="body">
   <md-spinner *ngIf="!isDataReady"></md-spinner>

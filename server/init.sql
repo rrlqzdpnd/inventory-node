@@ -15,4 +15,8 @@ CREATE TABLE IF NOT EXISTS inv_product_columns(
   is_required boolean default false
 );
 
-CREATE TABLE IF NOT EXISTS inv_product_items();
+CREATE TABLE IF NOT EXISTS inv_product_items(
+  id serial primary key,
+  product_column_id int references inv_product_columns(id) not null,
+  value varchar(2048)
+);

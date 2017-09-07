@@ -1,0 +1,9 @@
+md-input-container {
+  width: 100%;
+}
+
+section {
+  display: flex;
+  align-items: center;
+  height: 64px;
+}

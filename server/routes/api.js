@@ -79,6 +79,10 @@ router.get('/product/:id', (req, res) => {
   })
 });
 
+router.post('/product/:id', (req, res) => {
+  console.log(req.body);
+});
+
 router.get('/products/:query?', (req, res) => {
   let clientProm = pool.connect();
   clientProm.then((client) => {

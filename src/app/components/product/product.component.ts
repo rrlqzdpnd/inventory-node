@@ -3,6 +3,7 @@ import {
   ChangeDetectorRef,
   Component
 } from '@angular/core';
+import { MdDialog } from '@angular/material';
 import {
   ActivatedRoute,
   ParamMap
@@ -13,6 +14,7 @@ import 'rxjs/add/operator/switchMap';
 import 'rxjs/add/operator/toPromise';
 
 import { ProductService } from './product.service';
+import { ProductDialogComponent } from './dialog/dialog.component';
 
 @Component({
   selector: 'product',
@@ -29,7 +31,8 @@ export class ProductComponent {
 
   constructor(private _service: ProductService,
     private _route: ActivatedRoute,
-    private _changeDetector: ChangeDetectorRef) { }
+    private _changeDetector: ChangeDetectorRef,
+    public dialog: MdDialog) { }
 
   ngOnInit() {
     this._route.params.subscribe((params) => {
@@ -46,6 +49,16 @@ export class ProductComponent {
 
         this._changeDetector.detectChanges();
       });
+    });
+  }
+
+  openDialog() {
+    let dialog = this.dialog.open(ProductDialogComponent, {
+      width: '500px',
+      data: {
+        id: this.product.id,
+        columns: this.product.columns
+      }
     });
   }
 

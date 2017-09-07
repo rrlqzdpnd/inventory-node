@@ -1,0 +1,17 @@
+<!-- <pre>{{ dataTypeEnum | json }}</pre> -->
+<h3 md-dialog-title>Add new Item</h3>
+<md-dialog-content>
+  <section *ngFor="let column of data.columns">
+    <md-input-container *ngIf="column.type == dataTypeEnum[dataTypeEnum.String]">
+      <input mdInput type="text" placeholder="{{ column.name }}" [(ngModel)]="values[column.id]">
+    </md-input-container>
+    <md-input-container *ngIf="column.type == dataTypeEnum[dataTypeEnum.Integer]">
+      <input mdInput type="number" placeholder="{{ column.name }}" [(ngModel)]="values[column.id]">
+    </md-input-container>
+    <md-checkbox *ngIf="column.type == dataTypeEnum[dataTypeEnum.Boolean]" [(ngModel)]="values[column.id]">{{ column.name }}</md-checkbox>
+  </section>
+</md-dialog-content>
+<md-dialog-actions>
+  <button md-raised-button (click)="addItem()">Add</button>
+  <button md-button [md-dialog-close]>Cancel</button>
+</md-dialog-actions>
