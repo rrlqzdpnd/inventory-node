@@ -41,7 +41,8 @@ export class ProductDialogComponent {
     })
     .toPromise()
     .then((result: any) => {
-      this.dialogRef.close(result.body.newItem);
+      if(result.success)
+        this.dialogRef.close(result.body.newItem);
     })
   }
 

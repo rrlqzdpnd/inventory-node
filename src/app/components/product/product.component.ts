@@ -45,6 +45,7 @@ export class ProductComponent {
         this.product = <Product>data.body.product;
 
         this.productColumns = this.product.columns.map(col => col.slug);
+        this.productColumns.push('actions');
 
         this.itemList = new ItemList(this.product.items);
         this.itemDataSource = new ItemDataSource(this.itemList);
@@ -69,6 +70,15 @@ export class ProductComponent {
     });
   }
 
+  deleteItem(itemId) {
+    this._service.deleteItem(this.product.id, itemId)
+    .toPromise()
+    .then((result: any) => {
+      if(result.success)
+        this.itemList.delete(itemId);
+    });
+  }
+
 }
 
 interface ProductColumn {
@@ -79,9 +89,7 @@ interface ProductColumn {
   is_required: boolean
 }
 
-interface ProductItem {
-
-}
+interface ProductItem { }
 
 export interface Product {
   id: number,
@@ -109,12 +117,19 @@ class ItemList {
    * Expects Array of rows as input
    */
   add(rows) {
-    console.log(rows);
     let clone = this.data.slice();
     rows.forEach((row) => {
       clone.push(row);
     });
     this.list.next(clone);
+  }
+
+  delete(itemId) {
+    this.list.next(
+      this.data.filter((obj: any) => {
+        return obj.id != itemId;
+      })
+    );
   }
 
 }

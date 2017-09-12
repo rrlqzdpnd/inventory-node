@@ -226,6 +226,32 @@ router.post('/product/:id', (req, res) => {
   });
 });
 
+router.delete('/product/:id', (req, res) => {
+  var productId = req.params.id;
+  var itemId = req.query.itemId;
+
+  pool.connect()
+  .then((client) => {
+    return client.query({
+      text: "DELETE FROM inv_items WHERE id = $1 AND product_id = $2",
+      values: [ itemId, productId ]
+    })
+    .then((result) => {
+      client.release();
+      if(result.rowCount > 0)
+        returnMessage(res, true, { message: "Successfully deleted" });
+      else
+        return Promise.reject('No items deleted');
+    })
+    .catch((err) => {
+      return Promise.reject('Error deleting from database');
+    });
+  })
+  .catch((err) => {
+    returnMessage(res, false, { message: err });
+  });
+});
+
 router.get('/products/:query?', (req, res) => {
   let clientProm = pool.connect();
   clientProm.then((client) => {

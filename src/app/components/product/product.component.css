@@ -15,3 +15,7 @@
 #body > .mat-spinner {
   margin: auto;
 }
+
+.mat-column-actions {
+  flex: 0 0 7%;
+}

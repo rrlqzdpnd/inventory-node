@@ -13,9 +13,14 @@ export class ProductService {
   getProduct(id: number) {
     return this._http.get(
       `/api/product/${id}`,
-      {
-        headers: this.headers
-      }
+      { headers: this.headers }
+    );
+  }
+
+  deleteItem(productId, itemId) {
+    return this._http.delete(
+      `/api/product/${productId}?itemId=${itemId}`,
+      { headers: this.headers }
     );
   }
 
