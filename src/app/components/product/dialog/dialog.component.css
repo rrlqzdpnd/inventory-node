@@ -7,3 +7,7 @@ section {
   align-items: center;
   height: 64px;
 }
+
+h4.no-fields {
+  text-align: center;
+}

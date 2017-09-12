@@ -1,17 +1,15 @@
-<!-- <pre>{{ product | json }}</pre>
-<pre>{{ isDataReady | json }}</pre> -->
 <div id="title">
   <h2>{{ product?.name }}</h2>
   <button md-raised-button (click)="openDialog()">Add new Item</button>
 </div>
 <div id="body">
   <md-spinner *ngIf="!isDataReady"></md-spinner>
-  <md-table #table [dataSource]="itemList" *ngIf="isDataReady">
+  <md-table #table [dataSource]="itemDataSource" *ngIf="isDataReady">
     <ng-container *ngFor="let column of product?.columns">
       <ng-container cdkColumnDef="{{ column.slug }}">
         <md-header-cell *cdkHeaderCellDef>{{ column.name }}</md-header-cell>
         <md-cell *cdkCellDef="let row">
-          {{ row }}
+          {{ row[column.slug] }}
         </md-cell>
       </ng-container>
     </ng-container>

@@ -12,7 +12,7 @@ export class ProductDialogService {
 
   createItem(data) {
     return this._http.post(
-      `/api/product/${data.id}`,
+      `/api/product/${data.productId}`,
       JSON.stringify(data.row),
       {
         headers: this.headers

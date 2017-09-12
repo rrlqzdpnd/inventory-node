@@ -8,6 +8,7 @@ import {
   ActivatedRoute,
   ParamMap
 } from '@angular/router';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/operator/switchMap';
@@ -27,7 +28,8 @@ export class ProductComponent {
   isDataReady = false;
   product: Product = null;
   productColumns: string[] = [];
-  itemList : ItemDataSource | null;
+  itemDataSource : ItemDataSource | null;
+  itemList: ItemList | null;
 
   constructor(private _service: ProductService,
     private _route: ActivatedRoute,
@@ -44,7 +46,8 @@ export class ProductComponent {
 
         this.productColumns = this.product.columns.map(col => col.slug);
 
-        this.itemList = new ItemDataSource(this.product.items);
+        this.itemList = new ItemList(this.product.items);
+        this.itemDataSource = new ItemDataSource(this.itemList);
         this.isDataReady = true;
 
         this._changeDetector.detectChanges();
@@ -59,6 +62,10 @@ export class ProductComponent {
         id: this.product.id,
         columns: this.product.columns
       }
+    });
+
+    dialog.afterClosed().subscribe((data) => {
+      this.itemList.add(data);
     });
   }
 
@@ -86,14 +93,40 @@ export interface Product {
   items: Array<ProductItem>
 }
 
+class ItemList {
+
+  list: BehaviorSubject<ProductItem[]>;
+
+  constructor(initial: ProductItem[]) {
+    this.list = new BehaviorSubject<ProductItem[]>(initial);
+  }
+
+  get data(): ProductItem[] {
+    return this.list.value;
+  }
+
+  /**
+   * Expects Array of rows as input
+   */
+  add(rows) {
+    console.log(rows);
+    let clone = this.data.slice();
+    rows.forEach((row) => {
+      clone.push(row);
+    });
+    this.list.next(clone);
+  }
+
+}
+
 class ItemDataSource extends DataSource<any> {
 
-  constructor(private _itemList: Array<ProductItem>) {
+  constructor(private _itemList: ItemList) {
     super();
   }
 
-  connect(): Observable<Array<ProductItem>> {
-    return Observable.of(this._itemList);
+  connect(): Observable<ProductItem[]> {
+    return this._itemList.list;
   }
 
   disconnect() { }
